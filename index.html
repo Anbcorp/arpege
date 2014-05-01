@@ -1,39 +1,36 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" ng-app='arpege'>
 <head>
 <meta charset="utf-8">
-<title>jQuery UI Progressbar - Default functionality</title>
-<link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
-<script src="//code.jquery.com/jquery-1.10.2.js"></script>
-<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
-
-<script>
-$(function() {
-	var level = 0;
-	var pbvalue = 0;
-
-	$('#character').text(level);
-	setInterval(function() {
-		pbvalue += ($.now()/50)%2;
-
-  	$('#progressbar').progressbar({
-  		value: pbvalue,
-  		complete: function() {
-  			console.log("complete");
-  			pbvalue = 0;
-  			level += 1;
-  			$('#character').text(level);
-  		}
-  	});
-  },100);
-
-
-});
-</script>
-
+<title>ARpege - Automatic Role Play Game</title>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.16/angular.js"></script>
+<script src="ui-bootstrap-tpls-0.10.0.min.js"></script>
+<script src="script.js"></script>
+<link rel="stylesheet" 
+  href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" />
 </head>
+
+
 <body>
-<div id="progressbar"></div>
-<div id="character"></div>
+
+<div class="container">
+    <h1 class="text-center">YourCharacter</h1>
+<div class="row">
+<div class="col-md-3 panel panel-info">
+  <h2 class="text-center">ActionMenu</h2>
+  <button type="button" class="btn btn-primary btn-block">Go Pex</button>
+  <button type="button" class="btn btn-primary btn-block">Go Back Town</button>
+</div>
+
+<div class="col-md-6" ng-controller="ProgressDemoCtrl">
+    <h3 class="text-center">Dynamic</h3>
+    <progressbar max="max" value="progress"><span style="color:black; white-space:nowrap;">{{progress}} / {{max}}</span></progressbar>
+</div>
+<div class="col-md-3 panel panel-info">
+  <h2 class="text-center">CharacterSheet</h2>
+  <div>Level:<span class="badge pull-right">2</span></div>
+  <div>Health:<progressbar type="danger" value="55"></progressbar></div>
+</div>
+</div>
 </body>
 </html>

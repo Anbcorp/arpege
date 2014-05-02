@@ -17,13 +17,29 @@ var clock = {
 
 setInterval('clock.tick()', clock.refresh);
 
+var LevelCtrl = function($scope) {
+  $scope.level = 0;
+
+  $scope.newLevel = function() {
+    $scope.level += 1;
+    $scope.apply();
+  }
+
+}
 
 var ProgressDemoCtrl = function ($scope) {
-  $scope.max = 122;
+  $scope.max = 10;
   $scope.progress = 0;
 
   $scope.tick = function() {
     $scope.progress += 1; 
+    
+    if($scope.progress > $scope.max) {
+      $scope.progress = 0;
+      // TODO: how to call another controller ?
+      LevelCtrl.newLevel();
+    }
+
     // apply change to the view
     $scope.$apply();
   }

@@ -6,7 +6,7 @@
 <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.16/angular.js"></script>
 <script src="ui-bootstrap-tpls-0.10.0.min.js"></script>
 <script src="script.js"></script>
-<link rel="stylesheet" 
+<link rel="stylesheet"
   href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" />
 </head>
 
@@ -28,7 +28,7 @@
 </div>
 <div class="col-md-3 panel panel-info">
   <h2 class="text-center">CharacterSheet</h2>
-  <div>Level:<span class="badge pull-right">2</span></div>
+  <div ng-controller="LevelCtrl">Level:<span class="badge pull-right">{{level}}</span></div>
   <div>Health:<progressbar type="danger" value="55"></progressbar></div>
 </div>
 </div>

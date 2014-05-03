@@ -1,6 +1,7 @@
 var module = angular.module('arpege', ['ui.bootstrap']);
 
 // General clock to fire various events
+// TODO: this could be a service broadcasting the tick event
 var clock = {
     refresh: 1000,
     elapsedtime: 0,
@@ -26,6 +27,8 @@ module.service('Character', function($rootScope){
 
 });
 
+// We will probably need a CharacterController to display things like XP,
+// Health, Level
 var LevelCtrl = function($scope, Character) {
   $scope.level = Character.level;
 
@@ -35,10 +38,12 @@ var LevelCtrl = function($scope, Character) {
   });
 };
 
+// TODO: Maybe a MainProgressService ?
 var ProgressDemoCtrl = function ($scope, Character) {
   $scope.max = 10;
   $scope.progress = 0;
 
+// TODO: change this to a reaction on the tick event.
   $scope.tick = function() {
     $scope.progress += 1; 
     

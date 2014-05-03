@@ -1,4 +1,4 @@
-angular.module('arpege', ['ui.bootstrap']);
+var module = angular.module('arpege', ['ui.bootstrap']);
 
 // General clock to fire various events
 var clock = {
@@ -17,17 +17,25 @@ var clock = {
 
 setInterval('clock.tick()', clock.refresh);
 
-var LevelCtrl = function($scope) {
-  $scope.level = 0;
+module.service('Character', function($rootScope){
+  this.level = 1;
+  this.levelup = function() {
+    this.level += 1;
+    $rootScope.$broadcast('NewLevel');
+  };
 
-  $scope.newLevel = function() {
-    $scope.level += 1;
-    $scope.apply();
-  }
+});
 
-}
+var LevelCtrl = function($scope, Character) {
+  $scope.level = Character.level;
 
-var ProgressDemoCtrl = function ($scope) {
+  $scope.$on('NewLevel', function(){
+    $scope.level = Character.level;
+    $scope.$apply();
+  });
+};
+
+var ProgressDemoCtrl = function ($scope, Character) {
   $scope.max = 10;
   $scope.progress = 0;
 
@@ -36,8 +44,7 @@ var ProgressDemoCtrl = function ($scope) {
     
     if($scope.progress > $scope.max) {
       $scope.progress = 0;
-      // TODO: how to call another controller ?
-      LevelCtrl.newLevel();
+      Character.levelup();
     }
 
     // apply change to the view

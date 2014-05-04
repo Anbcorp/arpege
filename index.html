@@ -23,12 +23,15 @@
 </div>
 
 <div class="col-md-6" ng-controller="ProgressDemoCtrl">
-    <h3 class="text-center">Dynamic</h3>
+    <h3 class="text-center">Dynamic {{progress}}/{{max}}</h3>
     <progressbar max="max" value="progress"><span style="color:black; white-space:nowrap;">{{progress}} / {{max}}</span></progressbar>
 </div>
 <div class="col-md-3 panel panel-info">
   <h2 class="text-center">CharacterSheet</h2>
-  <div ng-controller="LevelCtrl">Level:<span class="badge pull-right">{{level}}</span></div>
+  <div ng-controller="LevelCtrl">
+    Level:<span class="badge pull-right">{{level}}</span>
+    XP: {{xp}}/{{maxXp}}
+  </div>
   <div>Health:<progressbar type="danger" value="55"></progressbar></div>
 </div>
 </div>

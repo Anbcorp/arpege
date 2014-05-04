@@ -28,6 +28,11 @@ module.service('Character', function($rootScope){
     $rootScope.$broadcast('NewLevel');
   };
 
+  this.addXp = function(xp) {
+    this.experience += xp;
+    $rootScope.$broadcast('CharXpChange');
+  };
+
   this.levelMaxXP = function() {
     return this.level*100+((this.level*this.level)*10);
   };
@@ -43,21 +48,29 @@ var LevelCtrl = function($scope, Character) {
     $scope.level = Character.level;
     $scope.$apply();
   });
+
+  $scope.$on('CharXpChange', function(){
+    $scope.xp = Character.experience;
+    $scope.maxXp = Character.levelMaxXP();
+    $scope.$apply();
+  });
 };
 
-// TODO: Maybe a MainProgressService ?
+// TODO: This is the experience bar, we probably need a mainController to fire various events depending on the ticks and actions in progress
 var ProgressDemoCtrl = function ($scope, Character) {
-  $scope.max = Character.levelMaxXP();
+  $scope.max = 100;
   $scope.progress = 0;
+  $scope.lastLevelMax = 0;
 
 // TODO: change this to a reaction on the tick event.
   $scope.tick = function() {
-    $scope.progress += Character.level*10;
+    Character.addXp(Character.level*10);
+    $scope.progress = (((Character.experience - $scope.lastLevelMax)*100)/(Character.levelMaxXP()-$scope.lastLevelMax));
     
-    if($scope.progress > $scope.max) {
+    if(Character.experience > Character.levelMaxXP()) {
+      $scope.lastLevelMax = Character.levelMaxXP();
       Character.levelup();
       $scope.progress = 0;
-      $scope.max = Character.levelMaxXP();
     }
     console.log($scope.progress+'/'+$scope.max+','+Character.level);
     // apply change to the view
@@ -65,39 +78,4 @@ var ProgressDemoCtrl = function ($scope, Character) {
   };
   clock.callbacks.push($scope.tick);
 
-
-  $scope.random = function() {
-    var value = Math.floor((Math.random() * 100) + 1);
-    var type;
-
-    if (value < 25) {
-      type = 'success';
-    } else if (value < 50) {
-      type = 'info';
-    } else if (value < 75) {
-      type = 'warning';
-    } else {
-      type = 'danger';
-    }
-
-    $scope.showWarning = (type === 'danger' || type === 'warning');
-
-    $scope.dynamic = value;
-    $scope.type = type;
-  };
-  $scope.random();
-  
-  $scope.randomStacked = function() {
-    $scope.stacked = [];
-    var types = ['success', 'info', 'warning', 'danger'];
-    
-    for (var i = 0, n = Math.floor((Math.random() * 4) + 1); i < n; i++) {
-        var index = Math.floor((Math.random() * 4));
-        $scope.stacked.push({
-          value: Math.floor((Math.random() * 30) + 1),
-          type: types[index]
-        });
-    }
-  };
-  $scope.randomStacked();
 };

@@ -20,9 +20,16 @@ setInterval('clock.tick()', clock.refresh);
 
 module.service('Character', function($rootScope){
   this.level = 1;
+  this.experience = 0;
+
   this.levelup = function() {
     this.level += 1;
+    console.log('new level'+this.level);
     $rootScope.$broadcast('NewLevel');
+  };
+
+  this.levelMaxXP = function() {
+    return this.level*100+((this.level*this.level)*10);
   };
 
 });
@@ -40,21 +47,22 @@ var LevelCtrl = function($scope, Character) {
 
 // TODO: Maybe a MainProgressService ?
 var ProgressDemoCtrl = function ($scope, Character) {
-  $scope.max = 10;
+  $scope.max = Character.levelMaxXP();
   $scope.progress = 0;
 
 // TODO: change this to a reaction on the tick event.
   $scope.tick = function() {
-    $scope.progress += 1; 
+    $scope.progress += Character.level*10;
     
     if($scope.progress > $scope.max) {
-      $scope.progress = 0;
       Character.levelup();
+      $scope.progress = 0;
+      $scope.max = Character.levelMaxXP();
     }
-
+    console.log($scope.progress+'/'+$scope.max+','+Character.level);
     // apply change to the view
     $scope.$apply();
-  }
+  };
   clock.callbacks.push($scope.tick);
 
 

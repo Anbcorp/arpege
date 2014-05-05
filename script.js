@@ -65,12 +65,12 @@ var ProgressDemoCtrl = function ($scope, Character) {
 // TODO: change this to a reaction on the tick event.
   $scope.tick = function() {
     Character.addXp(Character.level*10);
-    $scope.progress = (((Character.experience - $scope.lastLevelMax)*100)/(Character.levelMaxXP()-$scope.lastLevelMax));
+    $scope.progress = Math.round(Number(((Character.experience - $scope.lastLevelMax)*100)/(Character.levelMaxXP()-$scope.lastLevelMax)));
     
     if(Character.experience > Character.levelMaxXP()) {
       $scope.lastLevelMax = Character.levelMaxXP();
       Character.levelup();
-      $scope.progress = 0;
+      $scope.progress = Math.round(Number(((Character.experience - $scope.lastLevelMax)*100)/(Character.levelMaxXP()-$scope.lastLevelMax)));
     }
     console.log($scope.progress+'/'+$scope.max+','+Character.level);
     // apply change to the view

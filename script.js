@@ -32,6 +32,18 @@ module.service('Character', function($rootScope){
     $rootScope.$broadcast('NewLevel');
   };
 
+  this.str = function() {
+    return 10+3*(this.level-1);
+  };
+
+  this.dex = function() {
+    return 10+toInt(1.5*(this.level-1));
+  };
+
+  this.int = function() {
+    return 10+toInt(0.5*(this.level-1));
+  };
+
   this.addXp = function(xp) {
     this.experience += xp;
 
@@ -57,10 +69,18 @@ var CharSheetCtrl = function($scope, Character) {
   $scope.xpPercent = toInt(((Character.experience - $scope.lastMaxXp)*100)/(Character.levelMaxXP()-$scope.lastMaxXp));
   $scope.maxXp = Character.levelMaxXP();
 
+  $scope.str = Character.str();
+  $scope.dex = Character.dex();
+  $scope.int = Character.int();
+
   $scope.$on('NewLevel', function() {
     $scope.lastMaxXp = $scope.maxXp;
     $scope.maxXp = Character.levelMaxXP();
     $scope.level = Character.level;
+    $scope.str = Character.str();
+    $scope.dex = Character.dex();
+    $scope.int = Character.int();
+  
     // $scope.xp = Character.experience;
     // $scope.xpPercent = Math.round(Number(((Character.experience - $scope.lastMaxXp)*100)/(Character.levelMaxXP()-$scope.lastMaxXp)));
     $scope.$apply();

@@ -1,0 +1,38 @@
+Character -attacks-> Enemy
+	Enemy looses health
+Enemy -attacks-> Character
+	Character looses health
+
+Fight state machine
+
+	Death	Monster Alive ? No-> New Monster
+	|			|				| ^
+	Y			|				/ |
+CharDead?<--Attack Monster <----  |
+	N-------/	|  ^ 			  |
+				|  No			 XP !
+				|  |			  |
+			Monster Dead ? Yes----+
+
+
+
+Fighting monster
+	* New monster (class, level, health)
+	While monster is alive and character is alive
+		* character attacks monster
+		if attack successful
+			monster looses X health
+		if monster is alive
+			monster attacks character
+			if attacks successful
+				character losses X health
+
+Fighting monsters
+	while character is alive
+		-> fighting monsters
+
+
+MonsterService() {
+	fightMonsters()
+	fightMonster()
+}

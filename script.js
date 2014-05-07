@@ -22,6 +22,36 @@ var toInt = function(num) {
   return Math.round(Number(num));
 };
 
+module.service('MonsterFight', ['$rootScope', 'Character', function($rootScope, Character) {
+  this.fighting = False;
+
+  // TODO: Decouple this, monster is a service attribute. Every attack should be tied to a tick.
+  this.fightMonster = function() {
+    monster = new Monster();
+    while ( monster.isAlive() && Character.isAlive()) {
+      Character.attacks(monster);
+      if ( monster.isAlive()) {
+        monster.attacks(Character);
+      }
+    }
+  };
+
+  // TODO: This will be launched by a button
+  this.fightMonsters = function() {
+    this.fighting = True;
+    while(this.fighting) {
+      this.fightMonster();
+      this.fighting = Character.isAlive();
+    }
+  };
+
+  // The event is broadcasted by a button (stopFighting)
+  $rootScope.$on('StopFighting', function() {
+    this.fighting = False;
+  });
+
+}]);
+
 module.service('Character', function($rootScope){
   this.level = 1;
   this.experience = 0;

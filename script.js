@@ -1,22 +1,15 @@
 var module = angular.module('arpege', ['ui.bootstrap']);
 
-// General clock to fire various events
-// TODO: this could be a service broadcasting the tick event
-var clock = {
-    refresh: 1000,
-    elapsedtime: 0,
-    // callbacks to be called on each tick
-    callbacks: [],
-    tick: function() {
-      clock.elapsedtime += clock.refresh;
-      // Call the callbacks so they will do their things
-      for(var i = 0; i<clock.callbacks.length; i++) {
-        clock.callbacks[i]();
-      }
-    }
-};
+module.service('Clock', ['$rootScope', '$interval', function($rootScope, $interval) {
+  this.refresh = 1000;
 
-setInterval('clock.tick()', clock.refresh);
+  console.log('init');
+  this.ticker = $interval(function() {
+    $rootScope.$broadcast('ClockTick');
+    console.log('Tick');
+  }, this.refresh);
+
+}]);
 
 var toInt = function(num) {
   return Math.round(Number(num));
@@ -90,8 +83,9 @@ module.service('Character', function($rootScope){
 
 });
 
-// We will probably need a CharacterController to display things like XP,
-// Health, Level
+/*
+  Control the refresh of character informations
+*/
 var CharSheetCtrl = function($scope, Character) {
   $scope.level = Character.level;
   $scope.lastMaxXp = 0;
@@ -99,10 +93,13 @@ var CharSheetCtrl = function($scope, Character) {
   $scope.xpPercent = toInt(((Character.experience - $scope.lastMaxXp)*100)/(Character.levelMaxXP()-$scope.lastMaxXp));
   $scope.maxXp = Character.levelMaxXP();
 
+  // TODO: Maybe there is a way to map this more easily ?
   $scope.str = Character.str();
   $scope.dex = Character.dex();
   $scope.int = Character.int();
 
+  // TODO: This seems not useful as we are just mapping values from the model to 
+  // the view. See TODO above
   $scope.$on('NewLevel', function() {
     $scope.lastMaxXp = $scope.maxXp;
     $scope.maxXp = Character.levelMaxXP();
@@ -111,37 +108,34 @@ var CharSheetCtrl = function($scope, Character) {
     $scope.dex = Character.dex();
     $scope.int = Character.int();
   
-    // $scope.xp = Character.experience;
-    // $scope.xpPercent = Math.round(Number(((Character.experience - $scope.lastMaxXp)*100)/(Character.levelMaxXP()-$scope.lastMaxXp)));
-    $scope.$apply();
     console.log('New Level');
   });
 
+  // This seems legit as we are calculating the progress bar filling
   $scope.$on('CharXpChange', function(){
     $scope.xp = Character.experience;
     $scope.xpPercent = toInt(((Character.experience - $scope.lastMaxXp)*100)/(Character.levelMaxXP()-$scope.lastMaxXp));
     console.log("XpChange "+$scope.xp);
-    $scope.$apply();
   });
 };
 
-// TODO: This is the experience bar, we probably need a mainController to fire various events depending on the ticks and actions in progress
-var MainBarCtrl = function ($scope, Character) {
-  $scope.max = 100;
-  $scope.progress = 0;
-  $scope.lastLevelMax = 0;
+/*
 
-// TODO: change this to a reaction on the tick event.
-  $scope.tick = function() {
-    $scope.progress += 50;
+*/
+module.controller('MainBarCtrl',
+  ['$scope', 'Character', 'Clock',
+  function($scope, Character, Clock) {
+    $scope.max = 100;
+    $scope.progress = 0;
+    $scope.lastLevelMax = 0;
 
-    if($scope.progress > $scope.max) {
-      $scope.progress = 0;
-      Character.addXp(toInt(Character.level*50-20/Character.level));
-    }
-    // apply change to the view
-    $scope.$apply();
-  };
-  clock.callbacks.push($scope.tick);
+    $scope.$on('ClockTick', function() {
+      $scope.progress += 50;
 
-};
+      if($scope.progress > $scope.max) {
+        $scope.progress = 0;
+        Character.addXp(toInt(Character.level*50-20/Character.level));
+      }
+    });
+}]);
+

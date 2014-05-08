@@ -45,79 +45,65 @@ module.service('MonsterFight', ['$rootScope', 'Character', function($rootScope, 
 
 }]);
 
+// TODO: Character should be a plain javascript object
 module.service('Character', function($rootScope){
-  this.level = 1;
+  this.level = 0;
   this.experience = 0;
+  this.nextLvl = 0;
+  this.str = 0;
+  this.dex = 0;
+  this.int = 0;
 
   this.levelup = function() {
     this.level += 1;
-    console.log('new level'+this.level);
+    this.str = 10+3*(this.level-1);
+    this.dex = 10+toInt(1.5*(this.level-1));
+    this.int = 10+toInt(0.5*(this.level-1));
+    // TODO: this is not really neat as the call is supposed to be asynchronous,
+    // but we are forced to launche the event before recalculating the nextLvl 
+    // experience value
     $rootScope.$broadcast('NewLevel');
-  };
+    this.nextLvl = this.level*100+((this.level*this.level)*10);
+    console.log('new level'+this.level);
 
-  this.str = function() {
-    return 10+3*(this.level-1);
-  };
-
-  this.dex = function() {
-    return 10+toInt(1.5*(this.level-1));
-  };
-
-  this.int = function() {
-    return 10+toInt(0.5*(this.level-1));
   };
 
   this.addXp = function(xp) {
     this.experience += xp;
 
-
-    if(this.experience >= this.levelMaxXP()) {
+    if(this.experience >= this.nextLvl) {
       this.levelup();
     }
     $rootScope.$broadcast('CharXpChange');
   };
 
-  this.levelMaxXP = function() {
-    return this.level*100+((this.level*this.level)*10);
-  };
-
+  this.levelup();
 });
 
 /*
   Control the refresh of character informations
 */
-var CharSheetCtrl = function($scope, Character) {
-  $scope.level = Character.level;
-  $scope.lastMaxXp = 0;
-  $scope.xp = Character.experience;
-  $scope.xpPercent = toInt(((Character.experience - $scope.lastMaxXp)*100)/(Character.levelMaxXP()-$scope.lastMaxXp));
-  $scope.maxXp = Character.levelMaxXP();
+module.controller('CharSheetCtrl',
+  ['$scope', 'Character',
+  function($scope, Character) {
+    $scope.character = Character;
 
-  // TODO: Maybe there is a way to map this more easily ?
-  $scope.str = Character.str();
-  $scope.dex = Character.dex();
-  $scope.int = Character.int();
+    $scope.lastMaxXp = 0;
+    $scope.xpPercent = toInt((($scope.character.experience - $scope.lastMaxXp)*100)/($scope.character.nextLvl-$scope.lastMaxXp));
 
-  // TODO: This seems not useful as we are just mapping values from the model to 
-  // the view. See TODO above
-  $scope.$on('NewLevel', function() {
-    $scope.lastMaxXp = $scope.maxXp;
-    $scope.maxXp = Character.levelMaxXP();
-    $scope.level = Character.level;
-    $scope.str = Character.str();
-    $scope.dex = Character.dex();
-    $scope.int = Character.int();
-  
-    console.log('New Level');
-  });
+    $scope.$on('NewLevel', function() {
+      $scope.lastMaxXp = $scope.character.nextLvl;
+      $scope.xpPercent = 0;
+      console.log('New Level');
+    });
 
-  // This seems legit as we are calculating the progress bar filling
-  $scope.$on('CharXpChange', function(){
-    $scope.xp = Character.experience;
-    $scope.xpPercent = toInt(((Character.experience - $scope.lastMaxXp)*100)/(Character.levelMaxXP()-$scope.lastMaxXp));
-    console.log("XpChange "+$scope.xp);
-  });
-};
+    // This seems legit as we are calculating the progress bar filling
+    $scope.$on('CharXpChange', function(){
+      $scope.xpPercent = toInt((($scope.character.experience - $scope.lastMaxXp)*100)/($scope.character.nextLvl-$scope.lastMaxXp));
+      console.log("XpChange "+$scope.xpPercent+","+$scope.character.nextLvl);
+    });
+  }]
+);
 
 /*
 

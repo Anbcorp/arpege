@@ -25,6 +25,11 @@
 <div class="col-md-6" ng-controller="MainBarCtrl">
     <h3 class="text-center">Dynamic {{progress}}/{{max}}</h3>
     <progressbar max="max" value="progress"><span style="color:black; white-space:nowrap;">{{progress}} / {{max}}</span></progressbar>
+    <div>
+      <button ng-click="showHealth()">Health</button>
+      <button ng-click="showXP()">XP</button>
+      <span>{{value}}</span>   
+    </div>
 </div>
 <div class="col-md-3 panel panel-info" ng-controller="CharSheetCtrl">
   <h2 class="text-center">CharacterSheet</h2>

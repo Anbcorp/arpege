@@ -106,23 +106,62 @@ module.controller('CharSheetCtrl',
   }]
 );
 
-/*
+module.service('CharSvc',
+  ['$rootScope', 'Character',
+  function($rootScope, Character) {
+      this.pex = function(character) {
+        console.log('Pex');
+        character.addXp(toInt((character.lvlXp(character.level)-character.lvlXp(character.level-1))/3+2));
+      };
+}]);
 
+module.service('Healer',
+  [ '$rootScope',
+  function($rootScope){
+    this.action = function(character) {
+      character.health += 10;
+    };
+}]);
+
+module.service('Killer',
+  [ '$rootScope',
+  function($rootScope){
+    this.action = function(character) {
+      character.health = 15;
+      character.experience -= 100;
+    };
+}]);
+
+
+/*
+  Controls the main progress bar and actions
 */
 module.controller('MainBarCtrl',
-  ['$scope', 'Character', 'Clock',
-  function($scope, Character, Clock) {
+  ['$scope', '$injector', 'Character', 'Clock', 'CharSvc', 'Healer',
+  function($scope, $injector, Character, Clock, CharSvc, h) {
     $scope.max = 100;
     $scope.progress = 0;
     $scope.lastLevelMax = 0;
+    $scope.value = Character.experience;
+//    $scope.injector = angular.injector(['ng', 'arpege']);
 
     $scope.$on('ClockTick', function() {
       $scope.progress += 50;
-
       if($scope.progress > $scope.max) {
         $scope.progress = 0;
-        Character.addXp(toInt((Character.lvlXp(Character.level)-Character.lvlXp(Character.level-1))/3+2));
+        CharSvc.pex(Character);
       }
     });
+
+    $scope.showHealth = function() {
+      var act = $injector.get('Healer');
+      act.action(Character);
+    };
+
+    $scope.showXP = function() {
+      var act = $injector.get('Killer');
+      act.action(Character);
+    };
 }]);
 
+//var injector = angular.injector(['ng', 'arpege']);

@@ -47,37 +47,41 @@ module.service('MonsterFight', ['$rootScope', 'Character', function($rootScope, 
 
 // TODO: Character should be a plain javascript object
 module.service('Character', function($rootScope){
-  this.level = 0;
+  this.level = 1;
   this.experience = 0;
-  this.nextLvl = 0;
-  this.str = 0;
-  this.dex = 0;
-  this.int = 0;
+  this.health = 15;
 
-  this.levelup = function() {
-    this.level += 1;
-    this.str = 10+3*(this.level-1);
-    this.dex = 10+toInt(1.5*(this.level-1));
-    this.int = 10+toInt(0.5*(this.level-1));
-    // TODO: this is not really neat as the call is supposed to be asynchronous,
-    // but we are forced to launche the event before recalculating the nextLvl 
-    // experience value
-    $rootScope.$broadcast('NewLevel');
-    this.nextLvl = this.level*100+((this.level*this.level)*10);
-    console.log('new level'+this.level);
+  this.str = function() {
+    return 10+3*(this.level-1);
+  };
 
+  this.dex = function() {
+    return 10+toInt(1.5*(this.level-1));
+  };
+
+  this.int = function() {
+    return 10+toInt(0.5*(this.level-1));
+  };
+
+  this.maxHealth = function() {
+    return 30+this.level-1+this.str()*2;
+  };
+
+  this.lvlXp = function(level) {
+    return level*100+((level*level)*10);
   };
 
   this.addXp = function(xp) {
     this.experience += xp;
 
-    if(this.experience >= this.nextLvl) {
-      this.levelup();
+    if(this.experience >= this.lvlXp(this.level)) {
+      this.level += 1;
+      $rootScope.$broadcast('NewLevel');
     }
+
     $rootScope.$broadcast('CharXpChange');
   };
 
-  this.levelup();
 });
 
 /*
@@ -88,20 +92,17 @@ module.controller('CharSheetCtrl',
   function($scope, Character) {
     $scope.character = Character;
 
-    $scope.lastMaxXp = 0;
-    $scope.xpPercent = toInt((($scope.character.experience - $scope.lastMaxXp)*100)/($scope.character.nextLvl-$scope.lastMaxXp));
+    $scope.xpPercent = function() {
+      xp = $scope.character.experience;
+      startXp = $scope.character.lvlXp($scope.character.level-1);
+      endXp = $scope.character.lvlXp($scope.character.level);
+      return toInt(((xp - startXp)*100)/(endXp-startXp));
+    };
 
-    $scope.$on('NewLevel', function() {
-      $scope.lastMaxXp = $scope.character.nextLvl;
-      $scope.xpPercent = 0;
-      console.log('New Level');
-    });
+    $scope.healthPercent = function() {
+      return $scope.character.health*100/$scope.character.maxHealth();
+    };
 
-    // This seems legit as we are calculating the progress bar filling
-    $scope.$on('CharXpChange', function(){
-      $scope.xpPercent = toInt((($scope.character.experience - $scope.lastMaxXp)*100)/($scope.character.nextLvl-$scope.lastMaxXp));
-      console.log("XpChange "+$scope.xpPercent+","+$scope.character.nextLvl);
-    });
   }]
 );
 
@@ -120,7 +121,7 @@ module.controller('MainBarCtrl',
 
       if($scope.progress > $scope.max) {
         $scope.progress = 0;
-        Character.addXp(toInt(Character.level*50-20/Character.level));
+        Character.addXp(toInt((Character.lvlXp(Character.level)-Character.lvlXp(Character.level-1))/3+2));
       }
     });
 }]);

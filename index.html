@@ -13,23 +13,18 @@
 
 <body>
 
-<div class="container">
+<div class="container"  ng-controller="MainBarCtrl">
     <h1 class="text-center">YourCharacter</h1>
 <div class="row">
 <div class="col-md-3 panel panel-info">
   <h2 class="text-center">ActionMenu</h2>
-  <button type="button" class="btn btn-primary btn-block">Go Pex</button>
-  <button type="button" class="btn btn-primary btn-block">Go Back Town</button>
+  <button type="button" class="btn btn-primary btn-block" ng-click="pex()">Go Pex</button>
+  <button type="button" class="btn btn-primary btn-block" ng-click="heal()">Go Back Town</button>
 </div>
 
-<div class="col-md-6" ng-controller="MainBarCtrl">
+<div class="col-md-6">
     <h3 class="text-center">Dynamic {{progress}}/{{max}}</h3>
     <progressbar max="max" value="progress"><span style="color:black; white-space:nowrap;">{{progress}} / {{max}}</span></progressbar>
-    <div>
-      <button ng-click="showHealth()">Health</button>
-      <button ng-click="showXP()">XP</button>
-      <span>{{value}}</span>   
-    </div>
 </div>
 <div class="col-md-3 panel panel-info" ng-controller="CharSheetCtrl">
   <h2 class="text-center">CharacterSheet</h2>

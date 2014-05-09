@@ -127,7 +127,13 @@ module.service('Pexer',
 module.service('Healer',
   [ '$rootScope',
   function($rootScope){
-    this.action = function(character) {
+    this.completionTime = 10;
+
+    this.complete = function(character) {
+      this.doit(character);
+    };
+
+    this.doit = function(character) {
       character.health += 10;
     };
 }]);
@@ -167,14 +173,14 @@ module.controller('MainBarCtrl',
 
     });
 
-    $scope.showHealth = function() {
-      var act = $injector.get('Healer');
-      act.action(Character);
+    $scope.heal = function() {
+      $scope.action = $injector.get('Healer');
+      $scope.progress = 0;
     };
 
-    $scope.showXP = function() {
-      var act = $injector.get('Killer');
-      act.action(Character);
+    $scope.pex = function() {
+      $scope.action = $injector.get('Pexer');
+      $scope.progress = 0;
     };
 }]);
 

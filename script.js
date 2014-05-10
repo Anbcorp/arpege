@@ -76,6 +76,7 @@ module.service('Character', function($rootScope){
 
     if(this.experience >= this.lvlXp(this.level)) {
       this.level += 1;
+      this.health = this.maxHealth();
       $rootScope.$broadcast('NewLevel');
     }
 
@@ -109,12 +110,13 @@ module.controller('CharSheetCtrl',
 module.service('Pexer',
   ['$rootScope', 'Character',
   function($rootScope, Character) {
+    // TODO: maybe there is a way to get the service name from DOM?
+    this.name = "Fight";
     this.completionTime = 2;
 
     this.complete = function(character) {
       console.log('Pex');
       character.addXp(toInt((character.lvlXp(character.level)-character.lvlXp(character.level-1))/3+2));
-      character.health = character.maxHealth();
     };
 
     this.doit = function(character) {
@@ -127,6 +129,7 @@ module.service('Pexer',
 module.service('Healer',
   [ '$rootScope',
   function($rootScope){
+    this.name = "Town";
     this.completionTime = 10;
 
     this.complete = function(character) {
@@ -134,7 +137,11 @@ module.service('Healer',
     };
 
     this.doit = function(character) {
+      // TODO: this belongs to Character
       character.health += 10;
+      if(character.health >= character.maxHealth()) {
+        character.health = character.maxHealth();
+      }
     };
 }]);
 
@@ -160,6 +167,7 @@ module.controller('MainBarCtrl',
     $scope.value = Character.experience;
 
     $scope.action = $injector.get('Pexer');
+    $scope.nextAction = null;
 
     $scope.$on('ClockTick', function() {
       $scope.progress += 100/$scope.action.completionTime;
@@ -167,6 +175,10 @@ module.controller('MainBarCtrl',
       if($scope.progress > $scope.max) {
         $scope.progress = 0;
         $scope.action.complete(Character);
+        if ($scope.nextAction !== null) {
+          $scope.action = $scope.nextAction;
+          $scope.nextAction = null;
+        }
       } else {
         $scope.action.doit(Character);
       }
@@ -174,13 +186,13 @@ module.controller('MainBarCtrl',
     });
 
     $scope.heal = function() {
-      $scope.action = $injector.get('Healer');
-      $scope.progress = 0;
+      $scope.nextAction = $injector.get('Healer');
+      // $scope.progress = 0;
     };
 
     $scope.pex = function() {
-      $scope.action = $injector.get('Pexer');
-      $scope.progress = 0;
+      $scope.nextAction = $injector.get('Pexer');
+      // $scope.progress = 0;
     };
 }]);
 

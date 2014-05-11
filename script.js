@@ -49,7 +49,7 @@ module.service('MonsterFight', ['$rootScope', 'Character', function($rootScope, 
 module.service('Character', function($rootScope){
   this.level = 1;
   this.experience = 0;
-  this.health = 15;
+  this.health = 50;
 
   this.str = function() {
     return 10+3*(this.level-1);
@@ -107,21 +107,38 @@ module.controller('CharSheetCtrl',
   }]
 );
 
+function Monster() {
+  this.health = 100;
+  this.attack = 5;
+}
+
 module.service('Pexer',
   ['$rootScope', 'Character',
   function($rootScope, Character) {
     // TODO: maybe there is a way to get the service name from DOM?
     this.name = "Fight";
     this.completionTime = 2;
+    this.monster = null;
 
     this.complete = function(character) {
       console.log('Pex');
-      character.addXp(toInt((character.lvlXp(character.level)-character.lvlXp(character.level-1))/3+2));
+      if(this.monster.health <= 0) {
+        character.addXp(toInt((character.lvlXp(character.level)-character.lvlXp(character.level-1))/3+2));
+        this.monster = null;
+      }
     };
 
     this.doit = function(character) {
-      console.log('hunch !');
-      character.health -= 5;
+      if(this.monster === null) {
+        this.monster = new Monster();
+        this.monster.health = character.maxHealth()/2 - 10;
+      }
+
+      if(this.monster.health > 0) {
+        this.monster.health -= character.str()/5;
+        character.health -= 5;
+        console.log('hunch ! '+this.monster.health);
+      }
     };
 
 }]);

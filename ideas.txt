@@ -1,38 +1,12 @@
-Character -attacks-> Enemy
-	Enemy looses health
-Enemy -attacks-> Character
-	Character looses health
+Fighting monster need rework, but first :
 
-Fight state machine
+- Actions need startup and tear down functions
+	- startup : create monster, teardown : reset state
+- MainProgress need to reflect the action state, ie : the reversed monster health
+	- This suppose that mainProgress completion is dependent of the action progress
 
-	Death	Monster Alive ? No-> New Monster
-	|			|				| ^
-	Y			|				/ |
-CharDead?<--Attack Monster <----  |
-	N-------/	|  ^ 			  |
-				|  No			 XP !
-				|  |			  |
-			Monster Dead ? Yes----+
-
-
-
-Fighting monster
-	* New monster (class, level, health)
-	While monster is alive and character is alive
-		* character attacks monster
-		if attack successful
-			monster looses X health
-		if monster is alive
-			monster attacks character
-			if attacks successful
-				character losses X health
-
-Fighting monsters
-	while character is alive
-		-> fighting monsters
-
-
-MonsterService() {
-	fightMonsters()
-	fightMonster()
-}
+- Need a rest action, instead of going back to town
+- Need more text displays : Fighting monster, resting
+- Fighting should follow this cycle : going to pex (0) -> searching monster (1) -> Fighting -> (1).
+	- We coming from town, enter at state 0. After a fight, restart at 1
+	- This suppose setup and teardown may have their own progress bar

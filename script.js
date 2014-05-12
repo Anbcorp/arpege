@@ -107,10 +107,27 @@ module.controller('CharSheetCtrl',
   }]
 );
 
-function Monster() {
-  this.health = 100;
+function Monster(maxHealth) {
+  this.maxHealth = maxHealth;
+  this.health = maxHealth;
   this.attack = 5;
 }
+
+
+module.service('NullAction', 
+  ['$rootScope',
+  function($rootScope) {
+    this.name = "Do nothing";
+
+    this.doit = function(character) {
+      return true;
+    };
+
+    this.getPercentComplete = function() {
+      return 0;
+    }
+
+}]);
 
 module.service('Pexer',
   ['$rootScope', 'Character',
@@ -130,16 +147,31 @@ module.service('Pexer',
 
     this.doit = function(character) {
       if(this.monster === null) {
-        this.monster = new Monster();
-        this.monster.health = character.maxHealth()/2 - 10;
+        this.monster = new Monster(character.maxHealth()/2 - 10);
       }
 
       if(this.monster.health > 0) {
         this.monster.health -= character.str()/5;
         character.health -= 5;
         console.log('hunch ! '+this.monster.health);
+      } 
+
+      if(this.monster.health <= 0) {
+        this.monster = null;
+        character.addXp(toInt((character.lvlXp(character.level)-character.lvlXp(character.level-1))/3+2));
+        return true;
       }
+
+      return false;
     };
+
+    this.getPercentComplete = function() {
+      if(this.monster === null) {
+        return 0;
+      }
+
+      return (this.monster.maxHealth-this.monster.health)*100/this.monster.maxHealth;
+    }
 
 }]);
 
@@ -148,27 +180,32 @@ module.service('Healer',
   function($rootScope){
     this.name = "Town";
     this.completionTime = 10;
+    this.completion = 0;
 
     this.complete = function(character) {
       this.doit(character);
+      this.completion = 0;
     };
 
     this.doit = function(character) {
       // TODO: this belongs to Character
       character.health += 10;
+      this.completion += 1;
       if(character.health >= character.maxHealth()) {
         character.health = character.maxHealth();
       }
-    };
-}]);
 
-module.service('Killer',
-  [ '$rootScope',
-  function($rootScope){
-    this.action = function(character) {
-      character.health = 15;
-      character.experience -= 100;
+      if (this.completion >= this.completionTime) {
+        this.completion = 0;
+        return true;
+      }
+      return false;
     };
+
+    this.getPercentComplete = function() {
+      return this.completion*100/this.completionTime;
+    };
+
 }]);
 
 
@@ -180,37 +217,46 @@ module.controller('MainBarCtrl',
   function($scope, $injector, Character, Clock) {
     $scope.max = 100;
     $scope.progress = 0;
-    $scope.lastLevelMax = 0;
-    $scope.value = Character.experience;
 
-    $scope.action = $injector.get('Pexer');
+    $scope.action = $injector.get('NullAction');
     $scope.nextAction = null;
 
     $scope.$on('ClockTick', function() {
-      $scope.progress += 100/$scope.action.completionTime;
-
-      if($scope.progress > $scope.max) {
-        $scope.progress = 0;
-        $scope.action.complete(Character);
-        if ($scope.nextAction !== null) {
-          $scope.action = $scope.nextAction;
-          $scope.nextAction = null;
+      if($scope.action === null) {
+        if($scope.nextAction === null) {
+          return;
+        } else {
+          $scope.switchAction();
         }
-      } else {
-        $scope.action.doit(Character);
       }
 
+      complete = $scope.action.doit(Character);
+      $scope.progress = toInt($scope.action.getPercentComplete());
+      
+      if(complete === true) {
+        $scope.progress = 0;
+        if ($scope.nextAction !== null) {
+          $scope.switchAction();
+        }
+      }
     });
 
     $scope.heal = function() {
       $scope.nextAction = $injector.get('Healer');
-      // $scope.progress = 0;
     };
 
     $scope.pex = function() {
       $scope.nextAction = $injector.get('Pexer');
-      // $scope.progress = 0;
     };
+
+    $scope.idle = function() {
+      $scope.nextAction = $injector.get('NullAction');
+    }
+
+    $scope.switchAction = function() {
+      $scope.action = $scope.nextAction;
+      $scope.nextAction = null;
+    }
 }]);
 
 //var injector = angular.injector(['ng', 'arpege']);

@@ -113,7 +113,6 @@ function Monster(maxHealth) {
   this.attack = 5;
 }
 
-
 module.service('NullAction', 
   ['$rootScope',
   function($rootScope) {
@@ -129,6 +128,15 @@ module.service('NullAction',
 
 }]);
 
+/* TODO: services are used for main actions. An action may define subactions 
+  but is responsible of switching between them and report proper completion 
+  status, action name and description.
+
+  MainBar will bind name and description values so they are reported accordingly
+
+  MainBar will only call doit() on every tick, and reset() when switching 
+  actions
+*/
 module.service('Pexer',
   ['$rootScope', 'Character',
   function($rootScope, Character) {
@@ -136,6 +144,15 @@ module.service('Pexer',
     this.name = "Fight";
     this.completionTime = 2;
     this.monster = null;
+
+    // TODO: either pass the function or use a more traditional state value
+    this.state = this.startup;
+
+    this.startup = function(character) {
+      console.log('Searching');
+      // TODO: I will need to change the description of the activity in some way
+
+    };
 
     this.complete = function(character) {
       console.log('Pex');
@@ -146,6 +163,7 @@ module.service('Pexer',
     };
 
     this.doit = function(character) {
+      // TODO: doit will be the main function, switching between states
       if(this.monster === null) {
         this.monster = new Monster(character.maxHealth()/2 - 10);
       }

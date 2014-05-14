@@ -87,18 +87,19 @@ module.service('NullAction',
   ['$rootScope',
   function($rootScope) {
     this.name = "Do nothing";
+    this.percentComplete = 0;
 
     this.doit = function(character) {
       return true;
     };
 
-    this.getPercentComplete = function() {
-      return 0;
-    }
+    this.reset = function() {
+      return;
+    };
 
 }]);
 
-/* TODO: services are used for main actions. An action may define subactions 
+/* Services are used for main actions. An action may define subactions 
   but is responsible of switching between them and report proper completion 
   status, action name and description.
 
@@ -106,6 +107,10 @@ module.service('NullAction',
 
   MainBar will only call doit() on every tick, and reset() when switching 
   actions
+
+  Minimum values for service : name and percentComplete
+  Minimum methods for service : reset() and doit(character)
+  See 'NullAction' service
 */
 module.service('Pexer',
   ['$rootScope', 'Character',
@@ -114,26 +119,25 @@ module.service('Pexer',
     this.name = "Fight";
     this.completionTime = 2;
     this.monster = null;
+    this.percentComplete = 0;
+    this.progress = 0;
 
-    // TODO: either pass the function or use a more traditional state value
-    this.state = this.startup;
-
-    this.startup = function(character) {
+    this.searching = function(character) {
       console.log('Searching');
-      // TODO: I will need to change the description of the activity in some way
-
-    };
-
-    this.complete = function(character) {
-      console.log('Pex');
-      if(this.monster.health <= 0) {
-        character.addXp(toInt((character.lvlXp(character.level)-character.lvlXp(character.level-1))/3+2));
-        this.monster = null;
+      this.name = 'Searching monsters'
+      this.progress +=1;
+      this.percentComplete = toInt(this.progress*100/5);
+      if (this.progress >=5){
+        this.progress = 0;
+        this.percentComplete = 0;
+        return true;
       }
+      return false;
     };
 
-    this.doit = function(character) {
-      // TODO: doit will be the main function, switching between states
+    this.fighting = function(character) {
+      this.name = 'Fighting monster';
+
       if(this.monster === null) {
         this.monster = new Monster(character.maxHealth()/2 - 10);
       }
@@ -147,22 +151,37 @@ module.service('Pexer',
       if(this.monster.health <= 0) {
         this.monster = null;
         character.addXp(toInt((character.lvlXp(character.level)-character.lvlXp(character.level-1))/3+2));
+        this.percentComplete = 0;
         return true;
       }
 
+      this.percentComplete = toInt((this.monster.maxHealth - this.monster.health)*100/this.monster.maxHealth);
       return false;
     };
 
-    this.getPercentComplete = function() {
-      if(this.monster === null) {
-        return 0;
-      }
-
-      return (this.monster.maxHealth-this.monster.health)*100/this.monster.maxHealth;
+    this.reset = function() {
+      this.name = 'Fight';
+      this.progress = 0;
+      this.percentComplete = 0;
+      this.state = this.searching;
     }
 
+    this.doit = function(character) {
+      res = this.state(character);
+
+      if (this.state === this.searching && res === true) {
+        this.state = this.fighting;
+        return false;
+      }
+
+      return res;
+    };
+
+    // Sets the initial state
+    this.state = this.searching;
 }]);
 
+// TODO: convert to new style action
 module.service('Healer',
   [ '$rootScope',
   function($rootScope){
@@ -193,7 +212,6 @@ module.service('Healer',
     this.getPercentComplete = function() {
       return this.completion*100/this.completionTime;
     };
-
 }]);
 
 
@@ -219,7 +237,6 @@ module.controller('MainBarCtrl',
       }
 
       complete = $scope.action.doit(Character);
-      $scope.progress = toInt($scope.action.getPercentComplete());
       
       if(complete === true) {
         $scope.progress = 0;
@@ -242,9 +259,10 @@ module.controller('MainBarCtrl',
     }
 
     $scope.switchAction = function() {
+      if($scope.action !== null) {
+        $scope.action.reset();
+      }
       $scope.action = $scope.nextAction;
       $scope.nextAction = null;
     }
 }]);
-
-//var injector = angular.injector(['ng', 'arpege']);

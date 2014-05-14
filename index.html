@@ -24,8 +24,10 @@
 </div>
 
 <div class="col-md-6">
-    <h3 class="text-center">{{action.name}} {{progress}}/{{max}}</h3>
-    <progressbar max="max" value="progress"><span style="color:black; white-space:nowrap;">{{progress}} / {{max}}</span></progressbar>
+    <h3 class="text-center">{{action.name}} {{action.percentComplete}}/{{max}}</h3>
+    <progressbar max="max" value="action.percentComplete">
+      <span style="color:black; white-space:nowrap;">{{action.percentComplete}} / {{max}}</span>
+    </progressbar>
     Next: {{nextAction.name}}
 </div>
 <div class="col-md-3 panel panel-info" ng-controller="CharSheetCtrl">
@@ -34,7 +36,7 @@
     Level:<span class="badge pull-right">{{character.level}}</span>
   </div>
   <div>
-    XP: {{character.experience}}/{{character.lvlXp(character.level)}} 
+    XP: {{character.experience}}/{{character.lvlXp(character.level)}}
     <progressbar type="warning" value="xpPercent()" max="100"></progressbar>
   </div>
 

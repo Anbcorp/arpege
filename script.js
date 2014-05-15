@@ -19,7 +19,7 @@ var toInt = function(num) {
 module.service('Character', function($rootScope){
   this.level = 1;
   this.experience = 0;
-  this.health = 50;
+
 
   this.str = function() {
     return 10+3*(this.level-1);
@@ -53,6 +53,7 @@ module.service('Character', function($rootScope){
     $rootScope.$broadcast('CharXpChange');
   };
 
+  this.health = this.maxHealth();
 });
 
 /*

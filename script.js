@@ -71,7 +71,11 @@ module.controller('CharSheetCtrl',
     };
 
     $scope.healthPercent = function() {
-      return $scope.character.health*100/$scope.character.maxHealth();
+      if($scope.character.health < 0) {
+        return 0;
+      } else {
+        return $scope.character.health*100/$scope.character.maxHealth();
+      }
     };
 
   }]

@@ -13,3 +13,8 @@ def level_xp(n, first, last):
         new = round( A * math.exp( B * i ))
         print 'level:', i, 'exp:', last_xp+new-old, 'diff:', new-old
         last_xp += new - old
+
+def health():
+
+    for i in range(1,40+1):
+        print 30+(i-1)*15

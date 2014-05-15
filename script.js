@@ -34,7 +34,7 @@ module.service('Character', function($rootScope){
   };
 
   this.maxHealth = function() {
-    return 30+this.level-1+this.str()*2;
+    return 30+(this.level-1)*15+this.str()*2;
   };
 
   this.lvlXp = function(level) {
@@ -81,10 +81,10 @@ module.controller('CharSheetCtrl',
   }]
 );
 
-function Monster(maxHealth) {
-  this.maxHealth = maxHealth;
-  this.health = maxHealth;
-  this.attack = 5;
+function Monster(level) {
+  this.maxHealth = 30+(level-1)*15;
+  this.health = this.maxHealth;
+  this.attack = (level)*5;
 }
 
 module.service('NullAction', 
@@ -143,12 +143,12 @@ module.service('Pexer',
       this.name = 'Fighting monster';
 
       if(this.monster === null) {
-        this.monster = new Monster(character.maxHealth()/2 - 10);
+        this.monster = new Monster(character.level);
       }
 
       if(this.monster.health > 0) {
-        this.monster.health -= character.str()/5;
-        character.health -= 5;
+        this.monster.health -= (character.level)*5+character.str()/5;
+        character.health -= this.monster.attack;
         console.log('hunch ! '+this.monster.health);
       } 
 

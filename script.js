@@ -185,32 +185,33 @@ module.service('Pexer',
 module.service('Healer',
   [ '$rootScope',
   function($rootScope){
-    this.name = "Town";
-    this.completionTime = 10;
-    this.completion = 0;
+    this.name = "Resting";
+    this.percentComplete = 0;
+    this.progress = 0;
 
-    this.complete = function(character) {
-      this.doit(character);
-      this.completion = 0;
+    this.reset = function() {
+      this.percentComplete = 0;
     };
 
     this.doit = function(character) {
       // TODO: this belongs to Character
       character.health += 10;
-      this.completion += 1;
       if(character.health >= character.maxHealth()) {
         character.health = character.maxHealth();
-      }
-
-      if (this.completion >= this.completionTime) {
-        this.completion = 0;
+        this.percentComplete = 100;
         return true;
       }
-      return false;
-    };
 
-    this.getPercentComplete = function() {
-      return this.completion*100/this.completionTime;
+      // this.progress += 1;
+      // console.log(this.progress);
+      // if (this.progress >= 5) {
+      //   this.progress = 0;
+      //   this.percentComplete = 0;
+      //   return true;
+      // }
+
+      this.percentComplete = toInt(character.health*100/character.maxHealth());
+      return false;
     };
 }]);
 

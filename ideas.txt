@@ -1,12 +1,66 @@
-Fighting monster need rework, but first :
+TODO LIST:
+==========
 
-- Actions need startup and tear down functions
-	- startup : create monster, teardown : reset state
-- MainProgress need to reflect the action state, ie : the reversed monster health
-	- This suppose that mainProgress completion is dependent of the action progress
-
-- Need a rest action, instead of going back to town
-- Need more text displays : Fighting monster, resting
 - Fighting should follow this cycle : going to pex (0) -> searching monster (1) -> Fighting -> (1).
 	- We coming from town, enter at state 0. After a fight, restart at 1
 	- This suppose setup and teardown may have their own progress bar
+
+- Implement monsters xp reward
+- Randomize xp reward and fight values
+- Randomize 'hits' (maybe tie it to dexterity attribute)
+- Cap level to 50
+- Implement death and gameover, also restart
+- Implement fleeing from fight (with small chance to get killed)
+
+At this point we will have :
+ * Resting, doing nothing and fighting action
+ * Permadeath
+ * Probably unbalanced mechanics
+ * Player must balance between figthing most of the time and resting or fleeing
+   without getting killed
+
+
+Juice Ideas
+===========
+
+* Fight log
+
+
+
+Misc
+====
+
+Gnuplot file to generate figures at http://gnuplot.respawned.com/
+
+set terminal svg size 600,400 enhanced fname 'arial'  fsize 10 butt solid
+set output 'out.svg'
+# set terminal svg size 600,400 dynamic enhanced fname 'arial'  fsize 10 mousing name "approximate_1" butt solid 
+# set output 'approximate.1.svg'
+set style fill   solid 0.40 noborder
+set format y "%.1f"
+set key inside center top vertical Left reverse enhanced autotitles nobox
+set encoding utf8
+set samples 500, 500
+set xtics  norangelimit
+
+n = 50
+set xrange [ 0:n ] noreverse nowriteback
+
+str(x) = 10+(x-1)*2+exp((x-1)/10)
+
+# level xp
+start = 120
+end = 4000000
+aa = start/(exp(bb)-1)
+bb = log(end/start)/(n-1)
+lx(x) = aa*exp(bb*x) 
+level(x) = lx(x) - lx(x-1)
+
+# monster kills to level
+ma = 5/(exp(mb)-1)
+mb = log(1200/5)/(n-1)
+mx(x) = ma*exp(mb*x/1.09)
+monxp(x) = mx(x)-mx(x-1)
+
+plot monxp(x)*30#, level(x)
+
